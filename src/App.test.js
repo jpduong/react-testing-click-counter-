@@ -14,7 +14,9 @@ Enzyme.configure({ adapter: new EnzymeAdapter() });
  *
  */
 const setup = (props = {}, state = null) => {
-  return shallow(<App {...props} />);
+  const wrapper = shallow(<App {...props} />);
+  if (state) wrapper.setState(state);
+  return wrapper;
 };
 
 /**
@@ -48,6 +50,72 @@ test("renders counter display", () => {
   expect(counterDisplay.length).toBe(1);
 });
 
-test("counter starts at 0", () => {});
+test("counter starts at 0", () => {
+  const wrapper = setup();
+  const initialCounterState = wrapper.state("counter");
+  expect(initialCounterState).toBe(0);
+});
 
-test("clicking button increments counter", () => {});
+test("clicking button increments counter", () => {
+  const counter = 7;
+  const wrapper = setup(null, { counter });
+
+  // find button and click
+  const button = findByTestAttr(wrapper, "increment-button");
+  button.simulate("click");
+
+  // find display and test value
+  const counterDisplay = findByTestAttr(wrapper, "counter-display");
+  expect(counterDisplay.text()).toContain(counter + 1);
+});
+
+test("clicking button decrements counter", () => {
+  const counter = 10;
+  const wrapper = setup(null, { counter });
+
+  // find button and click
+  const button = findByTestAttr(wrapper, "decrement-button");
+  button.simulate("click");
+
+  // find display and test value
+  const counterDisplay = findByTestAttr(wrapper, "counter-display");
+  expect(counterDisplay.text()).toContain(counter - 1);
+});
+
+test("counter can not go below 0", () => {
+  const wrapper = setup();
+
+  // find button and click
+  const button = findByTestAttr(wrapper, "decrement-button");
+  button.simulate("click");
+
+  // find display and test value
+  const counterDisplay = findByTestAttr(wrapper, "counter-display");
+  expect(counterDisplay.text()).toContain(0);
+});
+
+test("error shows when trying to go below 0 count", () => {
+  const wrapper = setup();
+
+  // find button and click decrement
+  const button = findByTestAttr(wrapper, "decrement-button");
+  button.simulate("click");
+
+  const errorDiv = findByTestAttr(wrapper, "error-message");
+  expect(errorDiv.length).toBe(1);
+});
+
+test("error message is showing and is cleared once increment button is clicked", () => {
+  const wrapper = setup();
+
+  // find decrement button and click decrement
+  const decrementButton = findByTestAttr(wrapper, "decrement-button");
+  decrementButton.simulate("click");
+
+  // find increment button and click increment
+  const incrementButton = findByTestAttr(wrapper, "increment-button");
+  incrementButton.simulate("click");
+
+  const errorDiv = findByTestAttr(wrapper, "error-message");
+  expect(errorDiv.length).toBe(0);
+});
