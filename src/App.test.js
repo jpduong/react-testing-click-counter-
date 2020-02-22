@@ -5,6 +5,8 @@ import App from "./App";
 
 Enzyme.configure({ adapter: new EnzymeAdapter() });
 
+// Helpers
+
 /**
  * Factory function to create a ShallowWrapper for the App component
  * @function setup
@@ -20,7 +22,7 @@ const setup = (props = {}, state = null) => {
 };
 
 /**
- * Return ShallowWrapper containg node(s) with the given data-test value.
+ * Return ShallowWrapper containing node(s) with the given data-test value.
  * @param {ShallowWrapper} wrapper - Enzyme shallow wrapper to search within
  * @param {string} val - Value of data-test attribute for search.
  * @returns {ShallowWrapper}
@@ -28,6 +30,28 @@ const setup = (props = {}, state = null) => {
 const findByTestAttr = (wrapper, val) => {
   return wrapper.find(`[data-test='${val}']`);
 };
+
+/**
+ * Finds increment button in ShallowWrapper and simulates click
+ * @param {ShallowWrapper} wrapper
+ * @returns {void}
+ */
+const findIncButtonAndClick = wrapper => {
+  const button = findByTestAttr(wrapper, "increment-button");
+  button.simulate("click");
+};
+
+/**
+ * Finds decrement button in ShallowWrapper and simulates click
+ * @param {ShallowWrapper} wrapper
+ * @returns {void}
+ */
+const findDecButtonAndClick = wrapper => {
+  const button = findByTestAttr(wrapper, "decrement-button");
+  button.simulate("click");
+};
+
+// Tests
 
 test("renders without error", () => {
   const wrapper = setup();
@@ -60,9 +84,7 @@ test("clicking button increments counter", () => {
   const counter = 7;
   const wrapper = setup(null, { counter });
 
-  // find button and click
-  const button = findByTestAttr(wrapper, "increment-button");
-  button.simulate("click");
+  findIncButtonAndClick(wrapper);
 
   // find display and test value
   const counterDisplay = findByTestAttr(wrapper, "counter-display");
@@ -85,9 +107,7 @@ test("clicking button decrements counter", () => {
 test("counter can not go below 0", () => {
   const wrapper = setup();
 
-  // find button and click
-  const button = findByTestAttr(wrapper, "decrement-button");
-  button.simulate("click");
+  findDecButtonAndClick(wrapper);
 
   // find display and test value
   const counterDisplay = findByTestAttr(wrapper, "counter-display");
@@ -97,9 +117,7 @@ test("counter can not go below 0", () => {
 test("error shows when trying to go below 0 count", () => {
   const wrapper = setup();
 
-  // find button and click decrement
-  const button = findByTestAttr(wrapper, "decrement-button");
-  button.simulate("click");
+  findDecButtonAndClick(wrapper);
 
   const errorDiv = findByTestAttr(wrapper, "error-message");
   expect(errorDiv.length).toBe(1);
@@ -108,13 +126,8 @@ test("error shows when trying to go below 0 count", () => {
 test("error message is showing and is cleared once increment button is clicked", () => {
   const wrapper = setup();
 
-  // find decrement button and click decrement
-  const decrementButton = findByTestAttr(wrapper, "decrement-button");
-  decrementButton.simulate("click");
-
-  // find increment button and click increment
-  const incrementButton = findByTestAttr(wrapper, "increment-button");
-  incrementButton.simulate("click");
+  findDecButtonAndClick(wrapper);
+  findIncButtonAndClick(wrapper);
 
   const errorDiv = findByTestAttr(wrapper, "error-message");
   expect(errorDiv.length).toBe(0);
